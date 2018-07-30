@@ -1,3 +1,3 @@
-# Game of Life [![Build Status](https://travis-ci.org/Trufi/life.svg?branch=master)](https://travis-ci.org/Trufi/life)
+# Game of Life [![Build Status](https://travis-ci.com/Trufi/Life.svg?branch=master)](https://travis-ci.com/Trufi/Life)
 
-[Demo](https://trufi.github.io/life/)
+[Demo](https://trufi.github.io/Life/)
