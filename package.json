@@ -1,0 +1,36 @@
+{
+  "name": "life",
+  "version": "0.0.1",
+  "description": "Game of Life",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Trufi/life.git"
+  },
+  "author": {
+    "name": "Mstislav Zhivodkov",
+    "email": "stevemyz@gmail.com",
+    "url": "https://trufi.github.io/"
+  },
+  "license": "MIT",
+  "scripts": {
+    "start": "npm run dev",
+    "build": "webpack --mode=production",
+    "dev": "webpack-dev-server --mode=development",
+    "lint": "tslint 'src/**/*.ts'",
+    "test": "npm run lint && npm run build"
+  },
+  "dependencies": {
+    "tslib": "^1.9.2"
+  },
+  "devDependencies": {
+    "fork-ts-checker-webpack-plugin": "^0.4.2",
+    "ts-loader": "^4.4.1",
+    "tslint": "^5.10.0",
+    "tslint-eslint-rules": "^5.3.1",
+    "typescript": "^2.9.1",
+    "webpack": "^4.12.0",
+    "webpack-cli": "^3.0.3",
+    "webpack-dev-server": "^3.1.4"
+  }
+}
