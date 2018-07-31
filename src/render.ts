@@ -1,18 +1,13 @@
 export class Render {
     private width: number;
-    private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
     private imageData: ImageData;
 
-    constructor(container: HTMLElement, size: number[], styleSize: number[]) {
-        this.canvas = document.createElement('canvas');
-        this.canvas.style.width = styleSize[0] + 'px';
-        this.canvas.style.height = styleSize[1] + 'px';
-        this.canvas.width = size[0];
-        this.canvas.height = size[1];
-        container.appendChild(this.canvas);
+    constructor(canvas: HTMLCanvasElement, size: number[]) {
+        canvas.width = size[0];
+        canvas.height = size[1];
         this.width = size[0];
-        this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+        this.ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
         this.imageData = this.ctx.createImageData(size[0], size[1]);
     }
 

@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Trufi/life.git"
+    "url": "git+https://github.com/Trufi/Life.git"
   },
   "author": {
     "name": "Mstislav Zhivodkov",
@@ -24,6 +24,8 @@
     "tslib": "^1.9.2"
   },
   "devDependencies": {
+    "@types/dat.gui": "^0.7.1",
+    "dat.gui": "^0.7.2",
     "fork-ts-checker-webpack-plugin": "^0.4.2",
     "ts-loader": "^4.4.1",
     "tslint": "^5.10.0",

@@ -1,26 +1,18 @@
-// const random = (() => {
-//     let seed = 15;
-
-//     return () => {
-//         seed = seed * 16807 % 2147483647;
-//         return (seed - 1) / 2147483646;
-//     };
-// })();
-
 export class Game {
     public width: number;
     public height: number;
     public field: Uint8Array;
     private temp: Uint8Array;
 
-    constructor(size: number[]) {
+    constructor(size: number[], initialDensity: number) {
         this.width = size[0];
         this.height = size[1];
         this.field = new Uint8Array(this.width * this.height);
         this.temp = new Uint8Array(this.field.length);
 
         for (let i = 0; i < this.field.length; i++) {
-            this.field[i] = Math.round(Math.random());
+            const live = Math.random() / initialDensity > 1;
+            this.field[i] = live ? 1 : 0;
         }
     }
 
@@ -69,18 +61,3 @@ function collectCounts(out: Uint8Array, field: Uint8Array, width: number, height
 function getIndex(width: number, height: number, x: number, y: number): number {
     return width * ((y + height) % height) + (x + width) % width;
 }
-
-// function getCell(field: Uint8Array, width: number, height: number, x: number, y: number): number {
-//     return field[width * ((y + height) % height) + (x + width) % width];
-// }
-
-// function countLiveNeighbors(field: Uint8Array, width: number, height: number, x: number, y: number): number {
-//     return getCell(field, width, height, x - 1, y - 1) +
-//         getCell(field, width, height, x - 1, y) +
-//         getCell(field, width, height, x - 1, y + 1) +
-//         getCell(field, width, height, x, y - 1) +
-//         getCell(field, width, height, x, y + 1) +
-//         getCell(field, width, height, x + 1, y - 1) +
-//         getCell(field, width, height, x + 1, y) +
-//         getCell(field, width, height, x + 1, y + 1);
-// }
