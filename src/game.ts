@@ -1,3 +1,5 @@
+import { Figure } from './rle';
+
 export class Game {
     public width: number;
     public height: number;
@@ -10,9 +12,11 @@ export class Game {
         this.field = new Uint8Array(this.width * this.height);
         this.temp = new Uint8Array(this.field.length);
 
-        for (let i = 0; i < this.field.length; i++) {
-            const live = Math.random() / (1 - initialDensity) > 1;
-            this.field[i] = live ? 1 : 0;
+        if (initialDensity !== 0) {
+            for (let i = 0; i < this.field.length; i++) {
+                const live = Math.random() / (1 - initialDensity) > 1;
+                this.field[i] = live ? 1 : 0;
+            }
         }
     }
 
@@ -32,6 +36,15 @@ export class Game {
                 if (neighbors === 3) {
                     this.field[i] = 1;
                 }
+            }
+        }
+    }
+
+    public addFigure(x: number, y: number, figure: Figure) {
+        const {width, height, data} = figure;
+        for (let i = 0; i < width; i++) {
+            for (let j = 0; j < height; j++) {
+                this.field[(y + j) * this.width + x + i] = data[j * width + i];
             }
         }
     }

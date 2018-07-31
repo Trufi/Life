@@ -1,6 +1,8 @@
 import * as dat from 'dat.gui';
 import { Render } from './render';
 import { Game } from './game';
+import { figures } from './figures';
+import { readRLE, Figure } from './rle';
 
 const width = window.innerWidth;
 const height = window.innerHeight;
@@ -11,29 +13,57 @@ document.body.appendChild(canvas);
 canvas.style.width = width + 'px';
 canvas.style.height = height + 'px';
 
+let figure: Figure | undefined;
+
 const gui = new dat.GUI();
 const config = {
     speed: 10,
-    resolution: 0.2,
+    resolution: 0.3,
     initialDensity: 0.1,
-    restart: startGame,
+    restart: () => {
+        figure = undefined;
+        startGame();
+    },
+    figures: {} as {[name: string]: () => void},
 };
-gui.add(config, 'resolution', 0.01, 1).onChange(startGame);
-gui.add(config, 'initialDensity', 0, 1).onChange(startGame);
+
+gui.add(config, 'resolution', 0.01, 1).onChange(() => startGame());
+gui.add(config, 'initialDensity', 0, 1).onChange(() => startGame());
 gui.add(config, 'speed', 0, 10, 1);
 gui.add(config, 'restart');
+
+const figuresFolder = gui.addFolder('Figures');
+for (const name in figures) {
+    config.figures[name] = () => {
+        figure = readRLE(figures[name]);
+        startGame();
+    };
+    figuresFolder.add(config.figures, name);
+}
 
 let game: Game, render: Render;
 
 function startGame() {
+    const density = figure ? 0 : config.initialDensity;
+
     game = new Game(
         [Math.floor(width * config.resolution), Math.floor(height * config.resolution)],
-        config.initialDensity,
+        density,
     );
+
+    if (figure) {
+        game.addFigure(
+            Math.floor((game.width - figure.width) / 2),
+            Math.floor((game.height - figure.height) / 2),
+            figure,
+        );
+    }
+
     render = new Render(
         canvas,
         [game.width, game.height],
     );
+
     renderGame(game, render);
 }
 
