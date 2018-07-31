@@ -11,7 +11,7 @@ export class Game {
         this.temp = new Uint8Array(this.field.length);
 
         for (let i = 0; i < this.field.length; i++) {
-            const live = Math.random() / initialDensity > 1;
+            const live = Math.random() / (1 - initialDensity) > 1;
             this.field[i] = live ? 1 : 0;
         }
     }

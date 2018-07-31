@@ -15,7 +15,7 @@ const gui = new dat.GUI();
 const config = {
     speed: 10,
     resolution: 0.2,
-    initialDensity: 0.3,
+    initialDensity: 0.1,
     restart: startGame,
 };
 gui.add(config, 'resolution', 0.01, 1).onChange(startGame);
