@@ -44,24 +44,26 @@ for (const name in figures) {
 let game: Game, render: Render;
 
 function startGame() {
-    const density = figure ? 0 : config.initialDensity;
-
-    game = new Game(
-        [Math.floor(width * config.resolution), Math.floor(height * config.resolution)],
-        density,
-    );
+    game = new Game();
 
     if (figure) {
         game.addFigure(
-            Math.floor((game.width - figure.width) / 2),
-            Math.floor((game.height - figure.height) / 2),
+            20000 + 50,
+            20000 + 50,
+            figure,
+        );
+    } else {
+        const figure = createRandomFigure(config.initialDensity);
+        game.addFigure(
+            Math.round(20000 + figure.width / 2),
+            Math.round(20000),
             figure,
         );
     }
 
     render = new Render(
         canvas,
-        [game.width, game.height],
+        [width, height],
     );
 
     renderGame(game, render);
@@ -70,12 +72,12 @@ function startGame() {
 startGame();
 
 function renderGame(game: Game, render: Render) {
-    const {field} = game;
-    for (let i = 0; i < field.length; i++) {
-        if (field[i] !== 0) {
-            render.drawByIndex(i, rgba);
-        }
-    }
+    game.livingCells.forEach((cell) => {
+        const x = cell >>> 16;
+        const y = cell & 0xffff;
+        render.draw(x - 20000, y - 20000, rgba);
+    });
+
     render.commit();
 }
 
@@ -101,3 +103,22 @@ function gameStep() {
 }
 
 requestAnimationFrame(gameStep);
+
+function createRandomFigure(initialDensity: number): Figure {
+    const width = 930;
+    const height = 943;
+    const data = new Uint8Array(width * height);
+
+    if (initialDensity !== 0) {
+        for (let i = 0; i < data.length; i++) {
+            const live = Math.random() / (1 - initialDensity) > 1;
+            data[i] = live ? 1 : 0;
+        }
+    }
+
+    return {
+        width,
+        height,
+        data,
+    };
+}
