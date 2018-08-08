@@ -8,6 +8,8 @@ const width = window.innerWidth;
 const height = window.innerHeight;
 const rgba = [0, 0, 0, 255];
 
+const center = [0, 0];
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 canvas.style.width = width + 'px';
@@ -25,12 +27,14 @@ const config = {
         startGame();
     },
     figures: {} as {[name: string]: () => void},
+    step: () => gameStep(),
 };
 
 gui.add(config, 'resolution', 0.01, 1).onChange(() => startGame());
 gui.add(config, 'initialDensity', 0, 1).onChange(() => startGame());
 gui.add(config, 'speed', 0, 10, 1);
 gui.add(config, 'restart');
+gui.add(config, 'step');
 
 const figuresFolder = gui.addFolder('Figures');
 for (const name in figures) {
@@ -43,25 +47,25 @@ for (const name in figures) {
 
 let game: Game, render: Render;
 
-function startGame() {
-    const density = figure ? 0 : config.initialDensity;
+const renderSize = {
+    width: 100,
+    height: 100,
+};
 
-    game = new Game(
-        [Math.floor(width * config.resolution), Math.floor(height * config.resolution)],
-        density,
-    );
+function startGame() {
+    game = new Game();
 
     if (figure) {
         game.addFigure(
-            Math.floor((game.width - figure.width) / 2),
-            Math.floor((game.height - figure.height) / 2),
+            0,
+            0,
             figure,
         );
     }
 
     render = new Render(
         canvas,
-        [game.width, game.height],
+        [renderSize.width, renderSize.height],
     );
 
     renderGame(game, render);
@@ -70,12 +74,19 @@ function startGame() {
 startGame();
 
 function renderGame(game: Game, render: Render) {
-    const {field} = game;
-    for (let i = 0; i < field.length; i++) {
-        if (field[i] !== 0) {
-            render.drawByIndex(i, rgba);
+    for (let i = 0; i < renderSize.width; i++) {
+        for (let j = 0; j < renderSize.height; j++) {
+            const living = game.alive(
+                Math.floor(center[0] - renderSize.width / 2 + i),
+                Math.floor(center[1] - renderSize.height / 2 + j),
+            );
+
+            if (living) {
+                render.draw(i, j, rgba);
+            }
         }
     }
+
     render.commit();
 }
 
@@ -100,4 +111,4 @@ function gameStep() {
     }
 }
 
-requestAnimationFrame(gameStep);
+// requestAnimationFrame(gameStep);

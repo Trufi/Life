@@ -1,76 +1,64 @@
 import { Figure } from './rle';
+import { TreeNode, emptyTree, expand, setBit, step, getBit } from './node';
 
 export class Game {
-    public width: number;
-    public height: number;
-    public field: Uint8Array;
-    private temp: Uint8Array;
+    private tree: TreeNode;
 
-    constructor(size: number[], initialDensity: number) {
-        this.width = size[0];
-        this.height = size[1];
-        this.field = new Uint8Array(this.width * this.height);
-        this.temp = new Uint8Array(this.field.length);
-
-        if (initialDensity !== 0) {
-            for (let i = 0; i < this.field.length; i++) {
-                const live = Math.random() / (1 - initialDensity) > 1;
-                this.field[i] = live ? 1 : 0;
-            }
-        }
+    constructor() {
+        this.tree = emptyTree(3);
     }
 
     public step() {
-        // if empty field has three neighbors - alive
-        collectCounts(this.temp, this.field, this.width, this.height);
+        let tree = this.tree;
 
-        for (let i = 0; i < this.field.length; i++) {
-            const live = this.field[i] !== 0;
-            const neighbors = this.temp[i];
+        let steps = 0;
 
-            if (live) {
-                if (neighbors !== 2 && neighbors !== 3) {
-                    this.field[i] = 0;
-                }
-            } else {
-                if (neighbors === 3) {
-                    this.field[i] = 1;
-                }
+        while (
+            tree.level < 3 ||
+            tree.nw.population !== tree.nw.se.se.population ||
+            tree.ne.population !== tree.ne.sw.sw.population ||
+            tree.sw.population !== tree.sw.ne.ne.population ||
+            tree.se.population !== tree.se.nw.nw.population
+        ) {
+            tree = expand(tree);
+            steps++;
+            if (steps > 5) {
+                console.log('stack overflow');
+                break;
             }
         }
+
+        this.tree = step(tree);
     }
 
     public addFigure(x: number, y: number, figure: Figure) {
         const {width, height, data} = figure;
         for (let i = 0; i < width; i++) {
             for (let j = 0; j < height; j++) {
-                this.field[(y + j) * this.width + x + i] = data[j * width + i];
+                const living = data[j * width + i];
+                if (living) {
+                    this.setField(x + j, y + i, data[j * width + i]);
+                }
             }
         }
     }
-}
 
-function collectCounts(out: Uint8Array, field: Uint8Array, width: number, height: number) {
-    for (let i = 0; i < out.length; i++) {
-        out[i] = 0;
+    public alive(x: number, y: number): number {
+        return getBit(this.tree, x, y);
     }
 
-    for (let x = 0; x < width; x++) {
-        for (let y = 0; y < height; y++) {
-            if (field[width * y + x] !== 0) {
-                out[getIndex(width, height, x - 1, y - 1)]++;
-                out[getIndex(width, height, x - 1, y)]++;
-                out[getIndex(width, height, x - 1, y + 1)]++;
-                out[getIndex(width, height, x, y - 1)]++;
-                out[getIndex(width, height, x, y + 1)]++;
-                out[getIndex(width, height, x + 1, y - 1)]++;
-                out[getIndex(width, height, x + 1, y)]++;
-                out[getIndex(width, height, x + 1, y + 1)]++;
-            }
+    private setField(x: number, y: number, living: number) {
+        let max = 2 ** (this.tree.level - 1);
+
+        // A root node at level n supports coordinates from -2^(n-1) to 2^(n-1)-1
+        while (
+            x < -max || x > max - 1 ||
+            y < -max || y > max - 1
+        ) {
+            this.tree = expand(this.tree);
+            max = 2 ** (this.tree.level - 1);
         }
-    }
-}
 
-function getIndex(width: number, height: number, x: number, y: number): number {
-    return width * ((y + height) % height) + (x + width) % width;
+        this.tree = setBit(this.tree, x, y, living);
+    }
 }

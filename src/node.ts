@@ -1,4 +1,4 @@
-interface TreeNode {
+export interface TreeNode {
     nw: TreeNode;
     ne: TreeNode;
     sw: TreeNode;
@@ -7,7 +7,7 @@ interface TreeNode {
     level: number;
 }
 
-function createNode(
+export function createNode(
     nw: TreeNode,
     ne: TreeNode,
     sw: TreeNode,
@@ -20,7 +20,7 @@ function createNode(
 
 const stub = {} as TreeNode;
 
-function createLeaf(population: number): TreeNode {
+export function createLeaf(population: number): TreeNode {
     return {
         level: 0,
         population,
@@ -31,7 +31,31 @@ function createLeaf(population: number): TreeNode {
     };
 }
 
-function getBit(node: TreeNode, x: number, y: number): number {
+export function setBit(node: TreeNode, x: number, y: number, bit: number): TreeNode {
+    const {level, nw, ne, sw, se} = node;
+
+    if (level === 0) {
+        return createLeaf(bit);
+    }
+
+    const offset = 2 ** (level - 2);
+
+    if (x < 0) {
+        if (y < 0) {
+            return createNode(setBit(nw, x + offset, y + offset, bit), ne, sw, se);
+        } else {
+            return createNode(nw, ne, setBit(node.sw, x + offset, y - offset, bit), se);
+        }
+    } else {
+        if (y < 0) {
+            return createNode(nw, setBit(node.ne, x - offset, y + offset, bit), sw, se);
+        } else {
+            return createNode(nw, ne, sw, setBit(node.se, x - offset, y - offset, bit));
+        }
+    }
+}
+
+export function getBit(node: TreeNode, x: number, y: number): number {
     if (node.level === 0) {
         return node.population;
     }
@@ -48,7 +72,7 @@ function getBit(node: TreeNode, x: number, y: number): number {
         if (y < 0) {
             return getBit(node.ne, x - offset, y + offset);
         } else {
-            return getBit(node.se, x, y);
+            return getBit(node.se, x - offset, y - offset);
         }
     }
 }
@@ -58,7 +82,7 @@ function simulate(node: TreeNode): TreeNode {
 
     for (let y = -2; y < 2; y++) {
         for (let x = -2; x < 2; x++) {
-            bits = bits & getBit(node, x, y);
+            bits = (bits << 1) + getBit(node, x, y);
         }
     }
 
@@ -108,7 +132,7 @@ function centeredSubSubnode(node: TreeNode): TreeNode {
     return createNode(node.nw.se.se, node.ne.sw.sw, node.sw.ne.ne, node.se.nw.nw);
 }
 
-function step(node: TreeNode): TreeNode {
+export function step(node: TreeNode): TreeNode {
     const {level, population, nw, ne, sw, se} = node;
 
     if (population === 0) {
@@ -130,9 +154,27 @@ function step(node: TreeNode): TreeNode {
     const n22 = centeredSubnode(se);
 
     const tnw = step(createNode(n00, n01, n10, n11));
-    const tsw = step(createNode(n01, n02, n11, n12));
-    const tne = step(createNode(n10, n11, n20, n21));
+    const tne = step(createNode(n01, n02, n11, n12));
+    const tsw = step(createNode(n10, n11, n20, n21));
     const tse = step(createNode(n11, n12, n21, n22));
 
-    return createNode(tnw, tsw, tne, tse);
+    return createNode(tnw, tne, tsw, tse);
+}
+
+export function emptyTree(level: number): TreeNode {
+    if (level === 0) {
+        return createLeaf(0);
+    }
+
+    const node = emptyTree(level - 1);
+    return createNode(node, node, node, node);
+}
+
+export function expand(node: TreeNode): TreeNode {
+    const border = emptyTree(node.level - 1);
+    const tnw = createNode(border, border, border, node.nw);
+    const tne = createNode(border, border, node.ne, border);
+    const tsw = createNode(border, node.sw, border, border);
+    const tse = createNode(node.se, border, border, border);
+    return createNode(tnw, tne, tsw, tse);
 }
