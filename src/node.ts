@@ -5,6 +5,20 @@ export interface TreeNode {
     se: TreeNode;
     population: number;
     level: number;
+    id: number;
+}
+
+const allNodes: Map<number, TreeNode> = new Map();
+const hashMap: Map<string, TreeNode> = new Map();
+let idCounter = 5;
+
+function getHashKey(
+    nw: TreeNode,
+    ne: TreeNode,
+    sw: TreeNode,
+    se: TreeNode,
+) {
+    return `${nw.level + 1}_${nw.id}_${ne.id}_${sw.id}_${se.id}`;
 }
 
 export function createNode(
@@ -13,22 +27,64 @@ export function createNode(
     sw: TreeNode,
     se: TreeNode,
 ): TreeNode {
+    const key = getHashKey(nw, ne, sw, se);
+    const hashedNode = hashMap.get(key);
+    if (hashedNode) {
+        return hashedNode;
+    }
+
     const level = nw.level + 1;
     const population = nw.population + ne.population + sw.population + se.population;
-    return {level, nw, ne, sw, se, population};
+    const id = idCounter++;
+    const node = {
+        id,
+        level,
+        population,
+        nw,
+        ne,
+        sw,
+        se,
+    };
+    hashMap.set(key, node);
+    allNodes.set(id, node);
+    return node;
 }
 
-const stub = {} as TreeNode;
+const stub = {id: -1} as TreeNode;
+const zeroLeaf: TreeNode = {
+    id: 0,
+    level: 0,
+    population: 0,
+    nw: stub,
+    ne: stub,
+    sw: stub,
+    se: stub,
+};
+const liveLeaf: TreeNode = {
+    id: 1,
+    level: 0,
+    population: 1,
+    nw: stub,
+    ne: stub,
+    sw: stub,
+    se: stub,
+};
 
 export function createLeaf(population: number): TreeNode {
-    return {
-        level: 0,
-        population,
-        nw: stub,
-        ne: stub,
-        sw: stub,
-        se: stub,
-    };
+    if (population === 0) {
+        return zeroLeaf;
+    } else {
+        return liveLeaf;
+    }
+    // return {
+    //     id: idCounter++,
+    //     level: 0,
+    //     population,
+    //     nw: stub,
+    //     ne: stub,
+    //     sw: stub,
+    //     se: stub,
+    // };
 }
 
 export function setBit(node: TreeNode, x: number, y: number, bit: number): TreeNode {
